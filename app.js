@@ -1,19 +1,20 @@
 const qwerty = document.getElementById('qwerty');
 const phrase = document.getElementById('phrase');
-let missed = 0;
+var missed = 0;
+var totalCount = 0;
 const startScreen = document.getElementById('overlay');
 const startGameBt = document.querySelectorAll('a')[0];
 const phrases = [ 
-                    'rend' , 
-                    'extra', 
-                    'large', 
-                    'agreeable', 
-                    'resell', 
-                    'aboriginal', 
-                    'second', 
-                    'forbid', 
-                    'driving', 
-                    'puffy'
+                    'black bar' , 
+                    'extra love', 
+                    'large drum', 
+                    'agreeable song', 
+                    'resell your home', 
+                    'aboriginal person', 
+                    'second hour', 
+                    'forbid it', 
+                    'driving the mile', 
+                    'puffy and floffy'
                 ];
 
 
@@ -27,6 +28,7 @@ startGameBt.addEventListener('click', (e) => {
     }    
 })
 
+
 function getRandomPhraseAsArray (array) {
     var randomPhrase = array[Math.floor(Math.random()*array.length)];
     var patt = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/)
@@ -39,13 +41,17 @@ function getRandomPhraseAsArray (array) {
     }
 }
 
+
+var spaceCounter = 0;
 function addPhraseToDisplay (arr) {
     for(let i = 0; i < arr.length; i++) {
         let character = arr[i];
         let li = document.createElement('li');
         var str = / /.test(character);
         if (str) {
-            alert('invalid character');
+            li.textContent = character;
+            phrase.appendChild(li);
+            spaceCounter = spaceCounter+1;
         } else {
             li.className = 'letter';
             li.textContent = character;
@@ -61,8 +67,8 @@ function checkLetter (btnClicked) {
     for (let i = 0; i < letters.length; i++) {
         if(btnClicked == letters[i].textContent) {
             letters[i].className = 'letter show';
-            counterLetter = counterLetter+1;
             letterFounded = letters[i].textContent;
+            counterLetter = document.querySelectorAll('.show').length;
         } else {}
     }
     if (letterFounded != '') {
@@ -73,9 +79,10 @@ function checkLetter (btnClicked) {
     }
 }
 
-function checkWin (counterLetter, phraseArray, missed) {
-    if (counterLetter == phraseArray.length ) {
-        startGameBt.style.display = 'none';
+
+function checkWin (phraseArray, missed) {
+    totalCount = counterLetter + spaceCounter;
+    if (totalCount == phraseArray.length ) {
         startScreen.className = 'win';
         startScreen.firstElementChild.textContent = 'You have won';
         startScreen.style.display = '';
@@ -91,13 +98,13 @@ function checkWin (counterLetter, phraseArray, missed) {
 const phraseArray = getRandomPhraseAsArray(phrases);
 addPhraseToDisplay(phraseArray); 
 
-window.addEventListener( 'keypress', (e) => {
+qwerty.addEventListener( 'click', (e) => {
     const keys = document.querySelectorAll('.keyrow');
-    const keyPressed = e.key;
+    const keyPressed = e.target.textContent;
     for (let i = 0; i < keys.length; i++) {
         for (let z = 0; z < keys[i].children.length; z++) {
-            if (keyPressed == keys[i].children[z].textContent) {
-                const btPressed = keys[i].children[z];
+            const btPressed = keys[i].children[z];
+            if (keyPressed == keys[i].children[z].textContent && btPressed.disable !== 'true') {
                 const letterFound = checkLetter(btPressed.textContent);
                 btPressed.className = 'chosen';
                 btPressed.disable = 'true';
@@ -107,9 +114,35 @@ window.addEventListener( 'keypress', (e) => {
                     const ol = tries.parentNode;
                     ol.removeChild(tries);
                     missed = missed+1;
-                    checkWin(counterLetter, phraseArray, missed);
+                    checkWin(phraseArray, missed);
                 } else {
-                    checkWin(counterLetter, phraseArray, missed);
+                    checkWin(phraseArray, missed);
+                }
+            }
+        }
+    }
+            
+})
+
+window.addEventListener( 'keypress', (e) => {
+    const keys = document.querySelectorAll('.keyrow');
+    const keyPressed = e.key;
+    for (let i = 0; i < keys.length; i++) {
+        for (let z = 0; z < keys[i].children.length; z++) {
+            const btPressed = keys[i].children[z];
+            if (keyPressed == keys[i].children[z].textContent && btPressed.disable !== 'true') {
+                const letterFound = checkLetter(btPressed.textContent);
+                btPressed.className = 'chosen';
+                btPressed.disable = 'true';
+
+                if (letterFound == null) {
+                    const tries = document.querySelectorAll('.tries')[0];
+                    const ol = tries.parentNode;
+                    ol.removeChild(tries);
+                    missed = missed+1;
+                    checkWin(phraseArray, missed);
+                } else {
+                    checkWin(phraseArray, missed);
                 }
             }
         }
